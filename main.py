@@ -286,7 +286,7 @@ def main():
     print(model)
 
     # optimizer / criterion
-    num_epoch = 20
+    num_epoch = 11
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.AdamW(model.parameters(), lr=0.0001)
 

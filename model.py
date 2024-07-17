@@ -25,7 +25,7 @@ class VIT(nn.Module):
                 8,
                 dim_feedforward=2048,
                 activation="gelu",
-                dropout=0.25,
+                dropout=0.1,
                 batch_first=True
             ) for _ in range(3)]
         )
@@ -51,7 +51,7 @@ class TextEncoder(nn.Module):
             8,
             dim_feedforward=2048,
             activation="gelu",
-            dropout=0.25,
+            dropout=0.1,
             batch_first=True
         )
         self.tf2 = nn.TransformerEncoderLayer(
@@ -59,7 +59,7 @@ class TextEncoder(nn.Module):
             8,
             dim_feedforward=2048,
             activation="gelu",
-            dropout=0.25,
+            dropout=0.1,
             batch_first=True
         )
         self.tf3 = nn.TransformerEncoderLayer(
@@ -67,7 +67,7 @@ class TextEncoder(nn.Module):
             8,
             dim_feedforward=2048,
             activation="gelu",
-            dropout=0.25,
+            dropout=0.1,
             batch_first=True
         )
 
@@ -124,7 +124,7 @@ class VQAModel(nn.Module):
             8,
             dim_feedforward=2048,
             activation="gelu",
-            dropout=0.25,
+            dropout=0.1,
             batch_first=True
         )
         self.tf2 = nn.TransformerDecoderLayer(
@@ -132,7 +132,7 @@ class VQAModel(nn.Module):
             8,
             dim_feedforward=2048,
             activation="gelu",
-            dropout=0.25,
+            dropout=0.1,
             batch_first=True
         )
         self.tf3 = nn.TransformerDecoderLayer(
@@ -140,10 +140,10 @@ class VQAModel(nn.Module):
             8,
             dim_feedforward=2048,
             activation="gelu",
-            dropout=0.25,
+            dropout=0.1,
             batch_first=True
         )
-        self.ln = nn.Linear(emb_dim, n_answer)
+        self.ln = nn.Linear(emb_dim*2, n_answer)
 
     def forward(self, image, question):
         image_feature = self.vit(image)  # 画像の特徴量
@@ -152,7 +152,7 @@ class VQAModel(nn.Module):
         x = self.tf1(image_feature, question_feature)
         x = self.tf2(x, question_feature)
         x = self.tf3(x, question_feature)
-        x = x.squeeze(dim=1)
+        x = torch.cat([x.squeeze(dim=1), image_feature.squeeze(dim=1)], dim=1)
         x = self.ln(x)
 
         return x
